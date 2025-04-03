@@ -61,8 +61,8 @@ const loginUserHandler = async (req, res) => {
 const transporter = nodemailer.createTransport({
   service: "Gmail",
   auth: {
-    user: "vnaik@smartsight.in",
-    pass: "$$!vnaik@1033",
+    user: 
+    pass: 
   },
 });
 
