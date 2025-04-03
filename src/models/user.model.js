@@ -32,9 +32,9 @@ const getUserById = async (id) => {
   return rows[0];
 };
 
-const loginUser = async ({ username, email, password }) => {
-  const query = `SELECT * FROM users WHERE username = $1 OR email = $2;`;
-  const { rows } = await client.query(query, [username, email]);
+const loginUser = async ({ email, password }) => {
+  const query = `SELECT * FROM users WHERE email = $1;`;
+  const { rows } = await client.query(query, [email]);
 
   if (rows.length === 0) return null; // User not found
 
@@ -43,6 +43,7 @@ const loginUser = async ({ username, email, password }) => {
 
   return isPasswordValid ? user : null;
 };
+
 
 const generateResetToken = async (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15m" }); // Token valid for 15 mins
@@ -55,9 +56,9 @@ const getUserByEmail = async (email) => {
 };
 
 const updatePassword = async (userId, newPassword) => {
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  console.log("new password", newPassword)
   const query = `UPDATE users SET password = $1 WHERE id = $2 RETURNING *;`;
-  const { rows } = await client.query(query, [hashedPassword, userId]);
+  const { rows } = await client.query(query, [newPassword, userId]);
   return rows[0];
 };
 
