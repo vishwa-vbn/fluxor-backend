@@ -1,5 +1,6 @@
 const userModel = require("../models/user.model");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 
 const createUserHandler = async (req, res) => {
   try {
@@ -43,7 +44,11 @@ const loginUserHandler = async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(
+      { userId: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
 
     res.json({ message: "Login successful", token });
   } catch (err) {
@@ -52,9 +57,65 @@ const loginUserHandler = async (req, res) => {
   }
 };
 
+// Configure nodemailer (Replace with your SMTP provider)
+const transporter = nodemailer.createTransport({
+  service: "Gmail",
+  auth: {
+    user: "vnaik@smartsight.in",
+    pass: "$$!vnaik@1033",
+  },
+});
+
+const forgotPasswordHandler = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await userModel.getUserByEmail(email);
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const resetToken = await userModel.generateResetToken(user.id);
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
+    // Send email with reset link
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "Password Reset Request",
+      html: `<p>Click <a href="${resetLink}">here</a> to reset your password. This link is valid for 15 minutes.</p>`,
+    });
+
+    res.json({ message: "Password reset link sent to your email." });
+  } catch (err) {
+    console.error("Error in forgot password:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const resetPasswordHandler = async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded)
+      return res.status(400).json({ error: "Invalid or expired token" });
+
+    // Update password
+    const updatedUser = await userModel.updatePassword(
+      decoded.userId,
+      newPassword
+    );
+    res.json({ message: "Password successfully updated" });
+  } catch (err) {
+    console.error("Error in reset password:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
 module.exports = {
   createUserHandler,
   createAdminHandler,
   getUserByIdHandler,
   loginUserHandler,
+  forgotPasswordHandler,
+  resetPasswordHandler,
 };
