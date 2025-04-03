@@ -60,9 +60,9 @@ const loginUserHandler = async (req, res) => {
 
 // Configure nodemailer (Replace with your SMTP provider)
 const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com", // Brevo SMTP server
-  port: 587, // Use 587 for TLS, or 465 for SSL
-  secure: false, // false for TLS (STARTTLS), true for SSL
+  host: process.env.SMTP_SERVER, 
+  port: process.env.SMTP_PORT, 
+  secure: false, 
   auth: {
     user: process.env.EMAIL_USER, // Your Brevo SMTP login email
     pass: process.env.EMAIL_PASSWORD, // Your Brevo SMTP password
