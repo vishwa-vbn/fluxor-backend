@@ -11,9 +11,8 @@ const allowedOrigins = [
   "https://fluxor-frontend.vercel.app",
 ];
 
-// CORS options configuration
 const corsOptions = {
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -22,16 +21,21 @@ const corsOptions = {
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: true, // Important for cookies/tokens!
   optionsSuccessStatus: 204,
 };
 
-// Enable CORS with the specified options
 app.use(cors(corsOptions));
 
-// Handle preflight requests
-app.options("*", cors(corsOptions));
-// Parse incoming JSON requests
+app.options("*", (req, res) => {
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
+  res.sendStatus(204);
+});
+
+
 app.use(express.json());
 
 // Sample login route
