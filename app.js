@@ -4,29 +4,27 @@ const app = express();
 const port = process.env.PORT || 3000;
 require("dotenv").config();
 
-// 🔹 Dynamic CORS setup to handle different origins
+// 🔹 Enable CORS
+app.use(cors({
+  origin: "http://localhost:5173", // Change this to "*" only for development
+  methods: "GET,POST,PUT,DELETE,OPTIONS",
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true
+}));
+
+// 🔹 Manually handle preflight requests
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Change to "*" if needed
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.header("Access-Control-Allow-Credentials", "true");
 
   if (req.method === "OPTIONS") {
-    return res.sendStatus(204); // Handle preflight request
+    return res.sendStatus(204); // Preflight request success
   }
 
   next();
 });
-
-// 🛠 Enable CORS globally with dynamic origin handling
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true); // Allow non-browser clients (e.g., Postman)
-    callback(null, true); // Allow all origins dynamically
-  },
-  methods: "GET,POST,PUT,DELETE,OPTIONS",
-  credentials: true // Allow cookies and authorization headers
-}));
 
 // 🔹 Middleware to parse JSON bodies
 app.use(express.json());
@@ -42,7 +40,7 @@ app.use("/api/comments", require("./routes/comments.routes"));
 app.use("/api/ad-units", require("./routes/adUnits.routes"));
 app.use("/api/settings", require("./routes/settings.routes"));
 
-// 🔹 Simple health-check endpoint
+// 🔹 Health-check endpoint
 app.get("/", (req, res) => {
   res.send("Backend API is running!");
 });
