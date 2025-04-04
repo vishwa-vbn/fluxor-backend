@@ -7,17 +7,16 @@ require("dotenv").config();
 // Define allowed origins
 const allowedOrigins = [
   "http://localhost:5173", // Development
-  "https://your-frontend-domain.vercel.app" // Replace with your actual frontend Vercel domain
+  "https://fluxor-frontend.vercel.app" // Replace with your actual frontend domain
 ];
 
-// 🔹 Enable CORS with dynamic origin checking
-app.use(cors({
+// 🔹 CORS configuration
+const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl)
+    // Allow requests with no origin (e.g., mobile apps, curl)
     if (!origin) return callback(null, true);
-    
-    // Check if the origin is in our allowed list
-    if (allowedOrigins.indexOf(origin) !== -1) {
+    // Check if origin is allowed
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
@@ -25,11 +24,15 @@ app.use(cors({
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true
-}));
+  credentials: true,
+  optionsSuccessStatus: 204 // For preflight requests
+};
 
-// 🔹 Handle preflight requests manually (optional, but ensures Vercel compatibility)
-app.options("*", cors()); // Enable preflight for all routes
+// Apply CORS middleware
+app.use(cors(corsOptions));
+
+// Handle preflight requests for all routes
+app.options("*", cors(corsOptions));
 
 // 🔹 Middleware to parse JSON bodies
 app.use(express.json());
@@ -50,7 +53,9 @@ app.get("/", (req, res) => {
   res.send("Backend API is running!");
 });
 
-// 🔹 Start the server
+// 🔹 Start the server (for local dev, optional for Vercel)
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+module.exports = app; // Export for Vercel
