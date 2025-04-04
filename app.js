@@ -29,6 +29,11 @@ const corsOptions = {
 // Apply CORS middleware (MUST be first)
 app.use(cors(corsOptions));
 
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Headers", "x-access-token, Origin, Content-Type, Accept, Authorization");
+  next();
+});
+
 // Handle preflight requests for all routes
 app.options("*", cors(corsOptions));
 
