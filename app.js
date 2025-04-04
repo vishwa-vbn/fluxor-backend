@@ -23,7 +23,7 @@ const corsOptions = {
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization","Access-Control-Allow-Origin"],
   credentials: true,
   optionsSuccessStatus: 204 // For preflight requests
 };
