@@ -1,18 +1,20 @@
 const express = require("express");
 const cors = require("cors");
-const app = express();
-const port = process.env.PORT || 3000;
 require("dotenv").config();
 
-// Define allowed origins
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Define allowed origins – make sure these exactly match your client origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://fluxor-frontend.vercel.app",
 ];
 
-// 🔹 CORS configuration
+// CORS options configuration
 const corsOptions = {
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -21,48 +23,55 @@ const corsOptions = {
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
-  optionsSuccessStatus: 204,
+  optionsSuccessStatus: 204, // Some legacy browsers (IE11, various SmartTVs) choke on 204
 };
 
-// Apply CORS middleware (MUST be first)
+// Apply CORS middleware first so that every route gets these headers
 app.use(cors(corsOptions));
 
-
-
-// Handle preflight requests for all routes
+// Make sure preflight requests (OPTIONS) are handled for all routes
 app.options("*", cors(corsOptions));
 
-
-// 🔹 Middleware to parse JSON bodies
+// Parse incoming JSON requests
 app.use(express.json());
 
+// Sample login route
+app.post("/api/users/login", (req, res) => {
+  const { email, password } = req.body;
+  // Simple dummy validation – replace with your real authentication logic
+  if (!email || !password) {
+    return res.status(400).json({
+      authPending: false,
+      authSuccess: false,
+      authError: "Fill all the fields.",
+      accessToken: null,
+      refreshToken: null,
+      loginUser: null,
+    });
+  }
 
-app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Headers", "x-access-token, Origin, Content-Type, Accept, Authorization");
-  next();
+  // Dummy success response – in a real app you would check credentials and generate tokens
+  res.json({
+    authPending: false,
+    authSuccess: true,
+    authError: null,
+    accessToken: "dummyAccessToken",
+    refreshToken: "dummyRefreshToken",
+    loginUser: { email }
+  });
 });
 
-// 🔹 Mount routes
-app.use("/api/users", require("./routes/user.routes"));
-app.use("/api/posts", require("./routes/post.routes"));
-app.use("/api/categories", require("./routes/category.routes"));
-app.use("/api/post-categories", require("./routes/postCategories.routes"));
-app.use("/api/tags", require("./routes/tags.routes"));
-app.use("/api/post-tags", require("./routes/postTags.routes"));
-app.use("/api/comments", require("./routes/comments.routes"));
-app.use("/api/ad-units", require("./routes/adUnits.routes"));
-app.use("/api/settings", require("./routes/settings.routes"));
-
-// 🔹 Health-check endpoint
+// Health-check endpoint
 app.get("/", (req, res) => {
   res.send("Backend API is running!");
 });
 
-// 🔹 Start the server (for local dev, optional for Vercel)
+// Start the server
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
-module.exports = app; // Export for Vercel
+// Export the app for Vercel deployment, if needed
+module.exports = app;
