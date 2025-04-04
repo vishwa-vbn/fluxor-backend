@@ -11,10 +11,8 @@ const allowedOrigins = [
   "https://fluxor-frontend.vercel.app",
 ];
 
-// CORS options configuration
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
@@ -23,15 +21,15 @@ const corsOptions = {
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"],
+  allowedHeaders: ["Content-Type", "Authorization", "access-control-allow-origin"],
   credentials: true,
-  optionsSuccessStatus: 204, // Some legacy browsers (IE11, various SmartTVs) choke on 204
+  optionsSuccessStatus: 204,
 };
 
-// Apply CORS middleware first so that every route gets these headers
+
 app.use(cors(corsOptions));
 
-// Make sure preflight requests (OPTIONS) are handled for all routes
+
 app.options("*", cors(corsOptions));
 
 // Parse incoming JSON requests
