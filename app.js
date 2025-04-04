@@ -5,10 +5,11 @@ const port = process.env.PORT || 3000;
 require("dotenv").config();
 
 app.use(cors({
-  origin: ["http://localhost:5173", "https://yourfrontenddomain.com"], // Allow frontend URLs
+  origin: "*", // Allows requests from any origin
   methods: "GET,POST,PUT,DELETE",
   credentials: true
 }));
+
 
 
 // Middleware to parse JSON bodies
