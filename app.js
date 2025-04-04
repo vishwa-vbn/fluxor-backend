@@ -5,33 +5,32 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Define allowed origins – make sure these exactly match your client origins
+// Define allowed origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://fluxor-frontend.vercel.app",
 ];
 
+// CORS options configuration
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "access-control-allow-origin"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
   optionsSuccessStatus: 204,
 };
 
-
+// Enable CORS with the specified options
 app.use(cors(corsOptions));
 
-
+// Handle preflight requests
 app.options("*", cors(corsOptions));
-
 // Parse incoming JSON requests
 app.use(express.json());
 
