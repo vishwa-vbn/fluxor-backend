@@ -38,37 +38,18 @@ app.options("*", (req, res) => {
 
 app.use(express.json());
 
-// Sample login route
-app.post("/api/users/login", (req, res) => {
-  const { email, password } = req.body;
-  // Simple dummy validation – replace with your real authentication logic
-  if (!email || !password) {
-    return res.status(400).json({
-      authPending: false,
-      authSuccess: false,
-      authError: "Fill all the fields.",
-      accessToken: null,
-      refreshToken: null,
-      loginUser: null,
-    });
-  }
 
-  // Dummy success response – in a real app you would check credentials and generate tokens
-  res.json({
-    authPending: false,
-    authSuccess: true,
-    authError: null,
-    accessToken: "dummyAccessToken",
-    refreshToken: "dummyRefreshToken",
-    loginUser: { email }
-  });
-});
-
-// Health-check endpoint
-app.get("/", (req, res) => {
-  res.send("Backend API is running!");
-});
-
+ // Mount routes
+ app.use("/api/users", require("./routes/user.routes"));
+ app.use("/api/posts", require("./routes/post.routes"));
+ app.use("/api/categories", require("./routes/category.routes"));
+ app.use("/api/post-categories", require("./routes/postCategories.routes"));
+ app.use("/api/tags", require("./routes/tags.routes"));
+ app.use("/api/post-tags", require('./routes/postTags.routes'));
+ app.use("/api/comments", require("./routes/comments.routes"));
+ app.use("/api/ad-units", require("./routes/adUnits.routes"));
+ app.use("/api/settings", require("./routes/settings.routes"));
+ 
 // Start the server
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
