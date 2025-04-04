@@ -6,16 +6,14 @@ require("dotenv").config();
 
 // Define allowed origins
 const allowedOrigins = [
-  "http://localhost:5173", // Development
-  "https://fluxor-frontend.vercel.app" // Replace with your actual frontend domain
+  "http://localhost:5173",
+  "https://fluxor-frontend.vercel.app",
 ];
 
 // 🔹 CORS configuration
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g., mobile apps, curl)
     if (!origin) return callback(null, true);
-    // Check if origin is allowed
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -23,16 +21,17 @@ const corsOptions = {
     }
   },
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization","Access-Control-Allow-Origin"],
+  allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
   credentials: true,
-  optionsSuccessStatus: 204 // For preflight requests
+  optionsSuccessStatus: 204,
 };
 
-// Apply CORS middleware
+// Apply CORS middleware (MUST be first)
 app.use(cors(corsOptions));
 
 // Handle preflight requests for all routes
 app.options("*", cors(corsOptions));
+
 
 // 🔹 Middleware to parse JSON bodies
 app.use(express.json());
