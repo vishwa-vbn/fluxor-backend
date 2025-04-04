@@ -4,27 +4,32 @@ const app = express();
 const port = process.env.PORT || 3000;
 require("dotenv").config();
 
-// 🔹 Enable CORS
+// Define allowed origins
+const allowedOrigins = [
+  "http://localhost:5173", // Development
+  "https://your-frontend-domain.vercel.app" // Replace with your actual frontend Vercel domain
+];
+
+// 🔹 Enable CORS with dynamic origin checking
 app.use(cors({
-  origin: "http://localhost:5173", // Change this to "*" only for development
-  methods: "GET,POST,PUT,DELETE,OPTIONS",
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin is in our allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
-// 🔹 Manually handle preflight requests
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:5173"); // Change to "*" if needed
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(204); // Preflight request success
-  }
-
-  next();
-});
+// 🔹 Handle preflight requests manually (optional, but ensures Vercel compatibility)
+app.options("*", cors()); // Enable preflight for all routes
 
 // 🔹 Middleware to parse JSON bodies
 app.use(express.json());
