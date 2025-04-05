@@ -35,23 +35,53 @@ const getUserByIdHandler = async (req, res) => {
   }
 };
 
+// const loginUserHandler = async (req, res) => {
+//   try {
+//     const { email, password } = req.body; // Remove "username" field for consistency
+//     const user = await userModel.loginUser({ email, password });
+
+//     if (!user) {
+//       return res.status(401).json({ error: "Invalid email or password" });
+//     }
+
+//     // Generate JWT token
+//     const token = jwt.sign(
+//       { userId: user.id, role: user.role },
+//       process.env.JWT_SECRET,
+//       { expiresIn: "1h" }
+//     );
+
+//     res.json({ message: "Login successful", token, user });
+//   } catch (err) {
+//     console.error("Error logging in:", err);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// };
+
 const loginUserHandler = async (req, res) => {
   try {
-    const { email, password } = req.body; // Remove "username" field for consistency
+    const { email, password } = req.body;
     const user = await userModel.loginUser({ email, password });
 
     if (!user) {
       return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    // Generate JWT token
+    // 🔑 Fetch permissions using the roleId
+    const permissions = await userModel.getPermissionsByRoleId(user.roleid);
+
     const token = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    res.json({ message: "Login successful", token, user });
+    res.json({
+      message: "Login successful",
+      token,
+      user,
+      permissions, // 🚀 Send to frontend
+    });
   } catch (err) {
     console.error("Error logging in:", err);
     res.status(500).json({ error: "Internal server error" });
@@ -59,10 +89,11 @@ const loginUserHandler = async (req, res) => {
 };
 
 // Configure nodemailer (Replace with your SMTP provider)
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_SERVER, 
-  port: process.env.SMTP_PORT, 
-  secure: false, 
+  host: process.env.SMTP_SERVER,
+  port: process.env.SMTP_PORT,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER, // Your Brevo SMTP login email
     pass: process.env.EMAIL_PASSWORD, // Your Brevo SMTP password
