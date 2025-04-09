@@ -192,6 +192,56 @@ const getAllUsersHandler = async (req, res) => {
   }
 };
 
+
+
+const updateUserHandler = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedUser = await userModel.updateUser(id, req.body);
+    res.json(updatedUser);
+  } catch (err) {
+    console.error("Error updating user:", err);
+    if (err.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Delete a single user
+const deleteUserHandler = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedUser = await userModel.deleteUser(id);
+    res.json({ message: "User deleted successfully", user: deletedUser });
+  } catch (err) {
+    console.error("Error deleting user:", err);
+    if (err.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Bulk delete users
+const bulkDeleteUsersHandler = async (req, res) => {
+  try {
+    const { userIds } = req.body; // Expecting an array of user IDs
+    if (!Array.isArray(userIds) || userIds.length === 0) {
+      return res.status(400).json({ error: "Invalid or empty user IDs array" });
+    }
+
+    const deletedUsers = await userModel.bulkDeleteUsers(userIds);
+    res.json({ 
+      message: `Successfully deleted ${deletedUsers.length} users`, 
+      deletedUsers 
+    });
+  } catch (err) {
+    console.error("Error bulk deleting users:", err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   createUserHandler,
   createAdminHandler,
@@ -200,4 +250,7 @@ module.exports = {
   forgotPasswordHandler,
   getAllUsersHandler,
   resetPasswordHandler,
+  updateUserHandler,        // New
+  deleteUserHandler,        // New
+  bulkDeleteUsersHandler,
 };

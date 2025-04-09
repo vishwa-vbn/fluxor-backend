@@ -156,6 +156,74 @@ const getAllUsers = async () => {
   return rows;
 };
 
+
+const updateUser = async (id, userData) => {
+  const { username, email, name, bio, avatar, role, password } = userData;
+  
+  // If password is provided, hash it
+  let hashedPassword = null;
+  if (password) {
+    hashedPassword = await bcrypt.hash(password, 10);
+  }
+
+  // Fetch roleId if role is provided
+  let roleId = null;
+  if (role) {
+    const roleQuery = `SELECT id FROM roles WHERE name = $1;`;
+    const roleResult = await client.query(roleQuery, [role]);
+    if (roleResult.rows.length === 0) {
+      throw new Error(`Role "${role}" not found`);
+    }
+    roleId = roleResult.rows[0].id;
+  }
+
+  const query = `
+    UPDATE users 
+    SET 
+      username = COALESCE($1, username),
+      email = COALESCE($2, email),
+      name = COALESCE($3, name),
+      bio = COALESCE($4, bio),
+      avatar = COALESCE($5, avatar),
+      role = COALESCE($6, role),
+      roleid = COALESCE($7, roleid),
+      password = COALESCE($8, password)
+    WHERE id = $9
+    RETURNING *;
+  `;
+
+  const values = [
+    username || null,
+    email || null,
+    name || null,
+    bio || null,
+    avatar || null,
+    role || null,
+    roleId || null,
+    hashedPassword || null,
+    id,
+  ];
+
+  const { rows } = await client.query(query, values);
+  if (rows.length === 0) throw new Error("User not found");
+  return rows[0];
+};
+
+
+const deleteUser = async (id) => {
+  const query = `DELETE FROM users WHERE id = $1 RETURNING *;`;
+  const { rows } = await client.query(query, [id]);
+  if (rows.length === 0) throw new Error("User not found");
+  return rows[0];
+};
+
+// Bulk delete users
+const bulkDeleteUsers = async (userIds) => {
+  const query = `DELETE FROM users WHERE id = ANY($1) RETURNING *;`;
+  const { rows } = await client.query(query, [userIds]);
+  return rows;
+};
+
 module.exports = {
   createUser,
   createAdmin,
@@ -166,4 +234,7 @@ module.exports = {
   getAllUsers,
   updatePassword,
   getPermissionsByRoleId,
+  updateUser,         // New
+  deleteUser,         // New
+  bulkDeleteUsers,
 };
