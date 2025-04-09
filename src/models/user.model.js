@@ -2,14 +2,7 @@ const client = require("../config/db");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const createUser = async ({
-  username,
-  password,
-  email,
-  name,
-  bio,
-  avatar,
-}) => {
+const createUser = async ({ username, password, email, name, bio, avatar }) => {
   const role = "user"; // fixed role
   console.log("Creating regular user...");
 
@@ -37,7 +30,16 @@ const createUser = async ({
     VALUES($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *;
   `;
-  const values = [username, hashedPassword, email, name, bio, avatar, roleId, role];
+  const values = [
+    username,
+    hashedPassword,
+    email,
+    name,
+    bio,
+    avatar,
+    roleId,
+    role,
+  ];
   console.log("Inserting user into database...");
 
   const { rows } = await client.query(userQuery, values);
@@ -45,7 +47,6 @@ const createUser = async ({
 
   return rows[0];
 };
-
 
 const createAdmin = async ({
   username,
@@ -82,7 +83,16 @@ const createAdmin = async ({
     VALUES($1, $2, $3, $4, $5, $6, $7, $8)
     RETURNING *;
   `;
-  const values = [username, hashedPassword, email, name, bio, avatar, roleId, role];
+  const values = [
+    username,
+    hashedPassword,
+    email,
+    name,
+    bio,
+    avatar,
+    roleId,
+    role,
+  ];
   console.log("Inserting admin user into database...");
 
   const { rows } = await client.query(userQuery, values);
@@ -90,7 +100,6 @@ const createAdmin = async ({
 
   return rows[0];
 };
-
 
 const getUserById = async (id) => {
   const query = `SELECT * FROM users WHERE id = $1;`;
@@ -121,7 +130,6 @@ const getPermissionsByRoleId = async (roleId) => {
   return rows;
 };
 
-
 const generateResetToken = async (userId) => {
   return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15m" }); // Token valid for 15 mins
 };
@@ -133,10 +141,19 @@ const getUserByEmail = async (email) => {
 };
 
 const updatePassword = async (userId, newPassword) => {
-  console.log("new password", newPassword)
+  console.log("new password", newPassword);
   const query = `UPDATE users SET password = $1 WHERE id = $2 RETURNING *;`;
   const { rows } = await client.query(query, [newPassword, userId]);
   return rows[0];
+};
+
+const getAllUsers = async () => {
+  const query = `
+    SELECT id, username, email, name, bio, avatar, role, roleId 
+    FROM users;
+  `;
+  const { rows } = await client.query(query);
+  return rows;
 };
 
 module.exports = {
@@ -146,6 +163,7 @@ module.exports = {
   loginUser,
   getUserByEmail,
   generateResetToken,
+  getAllUsers,
   updatePassword,
   getPermissionsByRoleId,
 };

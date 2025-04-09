@@ -35,29 +35,6 @@ const getUserByIdHandler = async (req, res) => {
   }
 };
 
-// const loginUserHandler = async (req, res) => {
-//   try {
-//     const { email, password } = req.body; // Remove "username" field for consistency
-//     const user = await userModel.loginUser({ email, password });
-
-//     if (!user) {
-//       return res.status(401).json({ error: "Invalid email or password" });
-//     }
-
-//     // Generate JWT token
-//     const token = jwt.sign(
-//       { userId: user.id, role: user.role },
-//       process.env.JWT_SECRET,
-//       { expiresIn: "1h" }
-//     );
-
-//     res.json({ message: "Login successful", token, user });
-//   } catch (err) {
-//     console.error("Error logging in:", err);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// };
-
 const loginUserHandler = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -190,11 +167,37 @@ const resetPasswordHandler = async (req, res) => {
   }
 };
 
+const getAllUsersHandler = async (req, res) => {
+  try {
+    // Verify the user is an admin
+    const token = req.headers.authorization?.split(" ")[1]; // Expecting "Bearer <token>"
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "admin") {
+      return res.status(403).json({ error: "Access denied. Admins only." });
+    }
+
+    // Fetch all users
+    const users = await userModel.getAllUsers();
+    res.json(users);
+  } catch (err) {
+    console.error("Error fetching all users:", err);
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   createUserHandler,
   createAdminHandler,
   getUserByIdHandler,
   loginUserHandler,
   forgotPasswordHandler,
+  getAllUsersHandler,
   resetPasswordHandler,
 };
