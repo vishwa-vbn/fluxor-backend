@@ -14,6 +14,7 @@ const isAuthenticated = (req, res, next) => {
 };
 
 const isAdmin = (req, res, next) => {
+  console.log("req inside categories",req.user)
   if (req.user && req.user.role === "admin") {
     next();
   } else {
