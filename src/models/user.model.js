@@ -224,6 +224,43 @@ const bulkDeleteUsers = async (userIds) => {
   return rows;
 };
 
+
+const getUserWithPermissionsById = async (id) => {
+  try {
+    // Step 1: Fetch user data
+    const userQuery = `
+      SELECT id, username, email, name, bio, avatar, role, roleid, isactive
+      FROM users 
+      WHERE id = $1;
+    `;
+    const userResult = await client.query(userQuery, [id]);
+
+    if (userResult.rows.length === 0) {
+      throw new Error("User not found");
+    }
+
+    const user = userResult.rows[0];
+
+    // Step 2: Fetch permissions using roleId
+    const permissionsQuery = `
+      SELECT p.name, p.route
+      FROM permissions p
+      INNER JOIN role_permissions rp ON p.id = rp.permission_id
+      WHERE rp.role_id = $1;
+    `;
+    const permissionsResult = await client.query(permissionsQuery, [user.roleid]);
+    const permissions = permissionsResult.rows;
+
+    // Step 3: Combine user data and permissions
+    return {
+      user,
+      permissions,
+    };
+  } catch (err) {
+    throw err; // Let the controller handle the error
+  }
+};
+
 module.exports = {
   createUser,
   createAdmin,
@@ -234,6 +271,7 @@ module.exports = {
   getAllUsers,
   updatePassword,
   getPermissionsByRoleId,
+  getUserWithPermissionsById,
   updateUser,         // New
   deleteUser,         // New
   bulkDeleteUsers,
