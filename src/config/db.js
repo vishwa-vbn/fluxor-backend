@@ -57,7 +57,8 @@ queryClient.connect()
 listenClient.connect()
   .then(() => {
     console.log("✅ Connected to PostgreSQL (Listen Client)!");
-    listenClient.query("LISTEN tag_changes"); // Listen for tag_changes channel
+    listenClient.query("LISTEN tag_changes");
+    listenClient.query("LISTEN user_changes"); // Add// Listen for tag_changes channel
   })
   .catch((err) => console.error("❌ Listen Client Connection error:", err.stack));
 
