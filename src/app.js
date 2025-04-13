@@ -204,7 +204,6 @@ const io = new Server(server, {
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   },
-  transports: ["polling", "websocket"],
 });
 
 const blogNamespace = io.of("/blog");
@@ -227,32 +226,18 @@ listenClient.on("notification", (msg) => {
     const payload = JSON.parse(msg.payload);
     blogNamespace.emit("user_change", payload);
   }
-
-  if (msg.channel === "post_changes") {
-    const payload = JSON.parse(msg.payload);
-    blogNamespace.emit("post_change", payload);
-  }
-
-  if (msg.channel === "post_category_changes") {
-    const payload = JSON.parse(msg.payload);
-    blogNamespace.emit("post_category_change", payload);
-  }
-  if (msg.channel === "post_tag_changes") {
-    const payload = JSON.parse(msg.payload);
-    blogNamespace.emit("post_tag_change", payload);
-  }
 });
 
 // Mount routes
-// app.use("/api/users", require("./routes/user.routes"));
-// app.use("/api/posts", require("./routes/post.routes"));
-// app.use("/api/categories", require("./routes/category.routes"));
-// app.use("/api/post-categories", require("./routes/postCategories.routes"));
-// app.use("/api/tags", require("./routes/tags.routes"));
-// app.use("/api/post-tags", require("./routes/postTags.routes"));
-// app.use("/api/comments", require("./routes/comments.routes"));
-// app.use("/api/ad-units", require("./routes/adUnits.routes"));
-// app.use("/api/settings", require("./routes/settings.routes"));
+app.use("/api/users", require("./routes/user.routes"));
+app.use("/api/posts", require("./routes/post.routes"));
+app.use("/api/categories", require("./routes/category.routes"));
+app.use("/api/post-categories", require("./routes/postCategories.routes"));
+app.use("/api/tags", require("./routes/tags.routes"));
+app.use("/api/post-tags", require("./routes/postTags.routes"));
+app.use("/api/comments", require("./routes/comments.routes"));
+app.use("/api/ad-units", require("./routes/adUnits.routes"));
+app.use("/api/settings", require("./routes/settings.routes"));
 
 // Health-check endpoint
 app.get("/", (req, res) => {
@@ -263,36 +248,3 @@ app.get("/", (req, res) => {
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
-
-
-
-
-
-
-
-// {
-//   "version": 2,
-//   "builds": [
-//     {
-//       "src": "src/app.js",
-//       "use": "@vercel/node"
-//     }
-//   ],
-//   "routes": [
-//     {
-//       "src": "/(.*)",
-//       "dest": "/src/app.js",
-//       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-//       "headers": {
-//         "Access-Control-Allow-Origin": "*",
-//         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
-//         "Access-Control-Allow-Credentials": "true",
-//         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version"
-//       }
-//     }
-//   ],
-//   "env": {
-//     "NODE_ENV": "production"
-//   },
-
-// } 
