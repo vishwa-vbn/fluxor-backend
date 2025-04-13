@@ -204,6 +204,7 @@ const io = new Server(server, {
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   },
+  transports: ["polling", "websocket"],
 });
 
 const blogNamespace = io.of("/blog");
