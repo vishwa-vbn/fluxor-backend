@@ -244,15 +244,15 @@ listenClient.on("notification", (msg) => {
 });
 
 // Mount routes
-app.use("/api/users", require("./routes/user.routes"));
-app.use("/api/posts", require("./routes/post.routes"));
-app.use("/api/categories", require("./routes/category.routes"));
-app.use("/api/post-categories", require("./routes/postCategories.routes"));
-app.use("/api/tags", require("./routes/tags.routes"));
-app.use("/api/post-tags", require("./routes/postTags.routes"));
-app.use("/api/comments", require("./routes/comments.routes"));
-app.use("/api/ad-units", require("./routes/adUnits.routes"));
-app.use("/api/settings", require("./routes/settings.routes"));
+// app.use("/api/users", require("./routes/user.routes"));
+// app.use("/api/posts", require("./routes/post.routes"));
+// app.use("/api/categories", require("./routes/category.routes"));
+// app.use("/api/post-categories", require("./routes/postCategories.routes"));
+// app.use("/api/tags", require("./routes/tags.routes"));
+// app.use("/api/post-tags", require("./routes/postTags.routes"));
+// app.use("/api/comments", require("./routes/comments.routes"));
+// app.use("/api/ad-units", require("./routes/adUnits.routes"));
+// app.use("/api/settings", require("./routes/settings.routes"));
 
 // Health-check endpoint
 app.get("/", (req, res) => {
