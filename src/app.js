@@ -243,7 +243,7 @@ app.use("/api/settings", require("./routes/settings.routes"));
 app.get("/", (req, res) => {
   res.send("Backend API is running!");
 });
-
+//changes
 // Start server
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
