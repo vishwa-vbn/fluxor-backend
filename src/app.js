@@ -226,6 +226,11 @@ listenClient.on("notification", (msg) => {
     const payload = JSON.parse(msg.payload);
     blogNamespace.emit("user_change", payload);
   }
+
+  if (msg.channel === "post_changes") {
+    const payload = JSON.parse(msg.payload);
+    blogNamespace.emit("post_change", payload);
+  }
 });
 
 // Mount routes

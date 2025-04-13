@@ -1,4 +1,4 @@
-const client = require("../config/db");
+const { queryClient: client } = require("../config/db");
 
 // Create a new post
 const createPost = async (data) => {
@@ -9,14 +9,14 @@ const createPost = async (data) => {
     content,
     featuredImage = null,
     authorId,
-    status = 'draft',
+    status = "draft",
     publishedAt = null,
     metaTitle = null,
     metaDescription = null,
     isCommentsEnabled = true,
     viewCount = 0,
   } = data;
-  
+
   const query = `
     INSERT INTO posts 
       (title, slug, excerpt, content, featuredImage, authorId, status, publishedAt, metaTitle, metaDescription, isCommentsEnabled, viewCount)
@@ -24,7 +24,20 @@ const createPost = async (data) => {
       ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
     RETURNING *;
   `;
-  const values = [title, slug, excerpt, content, featuredImage, authorId, status, publishedAt, metaTitle, metaDescription, isCommentsEnabled, viewCount];
+  const values = [
+    title,
+    slug,
+    excerpt,
+    content,
+    featuredImage,
+    authorId,
+    status,
+    publishedAt,
+    metaTitle,
+    metaDescription,
+    isCommentsEnabled,
+    viewCount,
+  ];
   const { rows } = await client.query(query, values);
   return rows[0];
 };
@@ -70,7 +83,6 @@ const getAllPosts = async (page = 1, limit = 10) => {
   return rows;
 };
 
-
 // Update a post by ID
 const updatePost = async (id, data) => {
   const {
@@ -86,7 +98,7 @@ const updatePost = async (id, data) => {
     isCommentsEnabled,
     viewCount,
   } = data;
-  
+
   const query = `
     UPDATE posts
     SET title = $1,
@@ -103,7 +115,20 @@ const updatePost = async (id, data) => {
     WHERE id = $12
     RETURNING *;
   `;
-  const values = [title, slug, excerpt, content, featuredImage, status, publishedAt, metaTitle, metaDescription, isCommentsEnabled, viewCount, id];
+  const values = [
+    title,
+    slug,
+    excerpt,
+    content,
+    featuredImage,
+    status,
+    publishedAt,
+    metaTitle,
+    metaDescription,
+    isCommentsEnabled,
+    viewCount,
+    id,
+  ];
   const { rows } = await client.query(query, values);
   return rows[0];
 };
