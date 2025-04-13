@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const { queryClient: pool } = require("../config/db");
 
 class PostTag {
   static async addTagToPost(postId, tagId) {

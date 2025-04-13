@@ -231,6 +231,15 @@ listenClient.on("notification", (msg) => {
     const payload = JSON.parse(msg.payload);
     blogNamespace.emit("post_change", payload);
   }
+
+  if (msg.channel === "post_category_changes") {
+    const payload = JSON.parse(msg.payload);
+    blogNamespace.emit("post_category_change", payload);
+  }
+  if (msg.channel === "post_tag_changes") {
+    const payload = JSON.parse(msg.payload);
+    blogNamespace.emit("post_tag_change", payload);
+  }
 });
 
 // Mount routes
@@ -253,3 +262,36 @@ app.get("/", (req, res) => {
 server.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
+
+
+
+
+
+
+
+// {
+//   "version": 2,
+//   "builds": [
+//     {
+//       "src": "src/app.js",
+//       "use": "@vercel/node"
+//     }
+//   ],
+//   "routes": [
+//     {
+//       "src": "/(.*)",
+//       "dest": "/src/app.js",
+//       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+//       "headers": {
+//         "Access-Control-Allow-Origin": "*",
+//         "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+//         "Access-Control-Allow-Credentials": "true",
+//         "Access-Control-Allow-Headers": "Content-Type, Authorization, X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Date, X-Api-Version"
+//       }
+//     }
+//   ],
+//   "env": {
+//     "NODE_ENV": "production"
+//   },
+
+// } 
