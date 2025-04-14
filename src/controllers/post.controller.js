@@ -42,7 +42,12 @@ async function getAllPublishedPostsHandler(req, res) {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
     const posts = await postModel.getAllPublishedPosts(page, limit);
-    return successResponse(res, 200, "Published posts retrieved successfully", posts);
+    return successResponse(
+      res,
+      200,
+      "Published posts retrieved successfully",
+      posts
+    );
   } catch (error) {
     return errorResponse(res, error);
   }
@@ -52,7 +57,7 @@ async function getAllPostsHandler(req, res) {
   try {
     const page = parseInt(req.query.page, 10) || 1;
     const limit = parseInt(req.query.limit, 10) || 10;
-   
+
     const posts = await postModel.getAllPosts(page, limit);
     return successResponse(res, 200, "All posts retrieved successfully", posts);
   } catch (error) {
@@ -60,13 +65,13 @@ async function getAllPostsHandler(req, res) {
   }
 }
 
-
 // Update a post by ID
 async function updatePostHandler(req, res) {
   try {
     const id = parseInt(req.params.id, 10);
     const updatedPost = await postModel.updatePost(id, req.body);
-    if (!updatedPost) return errorResponse(res, new Error("Post not found"), 404);
+    if (!updatedPost)
+      return errorResponse(res, new Error("Post not found"), 404);
     return successResponse(res, 200, "Post updated successfully", updatedPost);
   } catch (error) {
     return errorResponse(res, error);
@@ -78,7 +83,8 @@ async function deletePostHandler(req, res) {
   try {
     const id = parseInt(req.params.id, 10);
     const deletedPost = await postModel.deletePost(id);
-    if (!deletedPost) return errorResponse(res, new Error("Post not found"), 404);
+    if (!deletedPost)
+      return errorResponse(res, new Error("Post not found"), 404);
     return successResponse(res, 200, "Post deleted successfully", deletedPost);
   } catch (error) {
     return errorResponse(res, error);

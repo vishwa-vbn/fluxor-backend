@@ -242,6 +242,43 @@ const bulkDeleteUsersHandler = async (req, res) => {
   }
 };
 
+
+const getUserWithPermissionsHandler = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Verify the user is authenticated and authorized (admin or self)
+    const token = req.headers.authorization?.split(" ")[1]; // Expecting "Bearer <token>"
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== "admin" && decoded.userId !== parseInt(id)) {
+      return res.status(403).json({ error: "Access denied. Admins or self only." });
+    }
+
+    // Fetch user with permissions
+    const { user, permissions } = await userModel.getUserWithPermissionsById(parseInt(id));
+    
+    // Format response to match Redux state structure
+    res.json({
+      message: "User data retrieved successfully",
+      user,
+      permissions,
+    });
+  } catch (err) {
+    console.error("Error fetching user with permissions:", err);
+    if (err.message === "User not found") {
+      return res.status(404).json({ error: "User not found" });
+    }
+    if (err.name === "JsonWebTokenError") {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
 module.exports = {
   createUserHandler,
   createAdminHandler,
@@ -253,4 +290,5 @@ module.exports = {
   updateUserHandler,        // New
   deleteUserHandler,        // New
   bulkDeleteUsersHandler,
+  getUserWithPermissionsHandler,
 };

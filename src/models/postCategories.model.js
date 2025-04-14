@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const { queryClient: pool } = require("../config/db");
 
 class PostCategory {
   static async addCategoryToPost(postId, categoryId) {
