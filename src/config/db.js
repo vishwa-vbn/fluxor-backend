@@ -63,6 +63,7 @@ listenClient.connect()
     listenClient.query('LISTEN post_category_changes');
     listenClient.query('LISTEN post_tag_changes');
     listenClient.query("LISTEN category_changes");
+    listenClient.query("LISTEN comment_changes");
   })
   .catch((err) => console.error("❌ Listen Client Connection error:", err.stack));
 
