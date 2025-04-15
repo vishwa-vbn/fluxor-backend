@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const { queryClient: pool } = require("../config/db");
 
 class Comment {
   static async createComment({ content, postId, authorId, authorName, authorEmail, parentId }) {
