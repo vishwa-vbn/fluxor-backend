@@ -1,4 +1,4 @@
-const pool = require("../config/db");
+const { queryClient: pool } = require("../config/db");
 
 class Comment {
   static async createComment({ content, postId, authorId, authorName, authorEmail, parentId }) {
@@ -7,6 +7,13 @@ class Comment {
        VALUES ($1, $2, $3, $4, $5, $6, 'pending', NOW()) RETURNING *`,
       [content, postId, authorId, authorName, authorEmail, parentId]
     );
+    
+    // Notify about new comment
+    await pool.query(
+      `SELECT pg_notify('comment_changes', $1::text)`,
+      [JSON.stringify({ action: 'create', comment: rows[0] })]
+    );
+    
     return rows[0];
   }
 
@@ -28,6 +35,13 @@ class Comment {
       `UPDATE comments SET status = $1 WHERE id = $2 RETURNING *`,
       [status, commentId]
     );
+    
+    // Notify about status update
+    await pool.query(
+      `SELECT pg_notify('comment_changes', $1::text)`,
+      [JSON.stringify({ action: 'update', comment: rows[0] })]
+    );
+    
     return rows[0];
   }
 
@@ -36,6 +50,13 @@ class Comment {
       `DELETE FROM comments WHERE id = $1 RETURNING *`,
       [commentId]
     );
+    
+    // Notify about deletion
+    await pool.query(
+      `SELECT pg_notify('comment_changes', $1::text)`,
+      [JSON.stringify({ action: 'delete', commentId })]
+    );
+    
     return rows[0];
   }
 }
