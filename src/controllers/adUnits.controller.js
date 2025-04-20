@@ -49,24 +49,35 @@ const createAdUnit = async (req, res) => {
         schedule,
         priority,
         status,
+        custom_content, // Already an object
       } = req.body;
 
       // Validate ad_type
-      const validAdTypes = ['banner', 'video', 'native'];
+      const validAdTypes = ["banner", "video", "native"];
       if (!validAdTypes.includes(ad_type)) {
         return errorResponse(
           res,
           400,
-          `Invalid ad_type. Must be one of: ${validAdTypes.join(', ')}`
+          `Invalid ad_type. Must be one of: ${validAdTypes.join(", ")}`
         );
       }
 
-      let custom_content = req.body.custom_content
-        ? JSON.parse(req.body.custom_content)
-        : {};
+      // Validate custom_content (if provided)
+      let parsedCustomContent = {};
+      if (custom_content) {
+        if (typeof custom_content !== "object" || Array.isArray(custom_content)) {
+          return errorResponse(
+            res,
+            400,
+            "custom_content must be a valid object"
+          );
+        }
+        parsedCustomContent = custom_content; // Use as-is, no JSON.parse needed
+      }
 
       let custom_file_id = null;
 
+      // Handle file upload only if a file is provided
       if (req.file) {
         const uploadResponse = await imageKit.upload({
           file: req.file.buffer,
@@ -89,24 +100,65 @@ const createAdUnit = async (req, res) => {
               },
             ],
           });
-          custom_content.image_url = optimizedUrl;
+          parsedCustomContent.image_url = optimizedUrl;
         } else if (ad_type === "video") {
-          custom_content.video_url = uploadResponse.url;
+          parsedCustomContent.video_url = uploadResponse.url;
+        }
+      } else {
+        // If no file is uploaded, retain custom_content as provided (e.g., external URLs)
+        // Optionally validate URLs here if needed
+        if (
+          parsedCustomContent.image_url &&
+          !isValidUrl(parsedCustomContent.image_url)
+        ) {
+          return errorResponse(res, 400, "Invalid image_url in custom_content");
+        }
+        if (
+          parsedCustomContent.youtube_url &&
+          !isValidUrl(parsedCustomContent.youtube_url)
+        ) {
+          return errorResponse(
+            res,
+            400,
+            "Invalid youtube_url in custom_content"
+          );
         }
       }
+
+      // Parse other fields that may be stringified
+      const parsedDimensions = dimensions
+        ? typeof dimensions === "string"
+          ? JSON.parse(dimensions)
+          : dimensions
+        : null;
+      const parsedTargetPages = target_pages
+        ? typeof target_pages === "string"
+          ? JSON.parse(target_pages)
+          : target_pages
+        : null;
+      const parsedTargetAudience = target_audience
+        ? typeof target_audience === "string"
+          ? JSON.parse(target_audience)
+          : target_audience
+        : null;
+      const parsedSchedule = schedule
+        ? typeof schedule === "string"
+          ? JSON.parse(schedule)
+          : schedule
+        : null;
 
       const adUnitData = {
         name,
         code: code || `AD-${Date.now()}`,
         ad_type,
         placement,
-        custom_content,
+        custom_content: parsedCustomContent,
         custom_file_id,
-        dimensions: dimensions ? JSON.parse(dimensions) : null,
+        dimensions: parsedDimensions,
         is_active: is_active === "true" || is_active === true,
-        target_pages: target_pages || null,
-        target_audience: target_audience || null,
-        schedule: schedule ? JSON.parse(schedule) : null,
+        target_pages: parsedTargetPages,
+        target_audience: parsedTargetAudience,
+        schedule: parsedSchedule,
         priority: priority ? parseInt(priority) : 0,
         status: status || "active",
       };
@@ -124,6 +176,15 @@ const createAdUnit = async (req, res) => {
   }
 };
 
+// Utility function to validate URLs
+function isValidUrl(url) {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
 const updateAdUnit = async (req, res) => {
   try {
     upload(req, res, async (err) => {
@@ -144,22 +205,35 @@ const updateAdUnit = async (req, res) => {
         schedule,
         priority,
         status,
+        custom_content, // Already an object
       } = req.body;
 
       // Validate ad_type
-      const validAdTypes = ['banner', 'video', 'native'];
+      const validAdTypes = ["banner", "video", "native"];
       if (ad_type && !validAdTypes.includes(ad_type)) {
         return errorResponse(
           res,
           400,
-          `Invalid ad_type. Must be one of: ${validAdTypes.join(', ')}`
+          `Invalid ad_type. Must be one of: ${validAdTypes.join(", ")}`
         );
       }
 
-      let custom_content = req.body.custom_content
-        ? JSON.parse(req.body.custom_content)
-        : {};
+      // Validate custom_content (if provided)
+      let parsedCustomContent = {};
+      if (custom_content) {
+        if (typeof custom_content !== "object" || Array.isArray(custom_content)) {
+          return errorResponse(
+            res,
+            400,
+            "custom_content must be a valid object"
+          );
+        }
+        parsedCustomContent = custom_content; // Use as-is, no JSON.parse needed
+      }
 
+      let custom_file_id = null;
+
+      // Handle file upload only if a file is provided
       if (req.file) {
         const uploadResponse = await imageKit.upload({
           file: req.file.buffer,
@@ -167,6 +241,8 @@ const updateAdUnit = async (req, res) => {
           folder: "/ad_units",
           tags: ["ad", ad_type],
         });
+
+        custom_file_id = uploadResponse.fileId;
 
         if (ad_type === "banner") {
           const optimizedUrl = imageKit.url({
@@ -180,23 +256,65 @@ const updateAdUnit = async (req, res) => {
               },
             ],
           });
-          custom_content.image_url = optimizedUrl;
+          parsedCustomContent.image_url = optimizedUrl;
         } else if (ad_type === "video") {
-          custom_content.video_url = uploadResponse.url;
+          parsedCustomContent.video_url = uploadResponse.url;
+        }
+      } else {
+        // If no file is uploaded, retain custom_content as provided (e.g., external URLs)
+        // Optionally validate URLs here if needed
+        if (
+          parsedCustomContent.image_url &&
+          !isValidUrl(parsedCustomContent.image_url)
+        ) {
+          return errorResponse(res, 400, "Invalid image_url in custom_content");
+        }
+        if (
+          parsedCustomContent.youtube_url &&
+          !isValidUrl(parsedCustomContent.youtube_url)
+        ) {
+          return errorResponse(
+            res,
+            400,
+            "Invalid youtube_url in custom_content"
+          );
         }
       }
+
+      // Parse other fields that may be stringified
+      const parsedDimensions = dimensions
+        ? typeof dimensions === "string"
+          ? JSON.parse(dimensions)
+          : dimensions
+        : null;
+      const parsedTargetPages = target_pages
+        ? typeof target_pages === "string"
+          ? JSON.parse(target_pages)
+          : target_pages
+        : null;
+      const parsedTargetAudience = target_audience
+        ? typeof target_audience === "string"
+          ? JSON.parse(target_audience)
+          : target_audience
+        : null;
+      const parsedSchedule = schedule
+        ? typeof schedule === "string"
+          ? JSON.parse(schedule)
+          : schedule
+        : null;
 
       const updateData = {
         name,
         code: code || `AD-${Date.now()}`,
         ad_type,
         placement,
-        custom_content,
-        dimensions: dimensions ? JSON.parse(dimensions) : null,
+        custom_content: parsedCustomContent,
+        custom_file_id,
+        dimensions: parsedDimensions,
         is_active: is_active === "true" || is_active === true,
-        target_pages: target_pages || null,
-        target_audience: target_audience || null,
-        schedule: schedule ? JSON.parse(schedule) : null,
+        target_pages: parsedTargetPages,
+        target_audience: parsedTargetAudience,
+        schedule: parsedSchedule,
         priority: priority ? parseInt(priority) : 0,
         status: status || "active",
       };
@@ -217,6 +335,8 @@ const updateAdUnit = async (req, res) => {
     return errorResponse(res, 500, error.message);
   }
 };
+
+
 
 // Get all ad units
 const getAdUnits = async (req, res) => {
