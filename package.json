@@ -14,7 +14,7 @@
   "dependencies": {
     "@planetscale/database": "^1.19.0",
     "bcryptjs": "^3.0.2",
-    "cloudinary": "^2.6.0",
+    "cloudinary": "^1.21.0",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "drizzle-orm": "^0.41.0",
