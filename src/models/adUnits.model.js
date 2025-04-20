@@ -175,7 +175,6 @@ class AdSettings {
     );
     return rows[0];
   }
- 
 }
 
 module.exports = { AdUnit, AdSettings };
