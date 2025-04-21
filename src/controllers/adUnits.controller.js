@@ -472,7 +472,7 @@ const upsertAdSettings = async (req, res) => {
     }
 
     // Validate ad_format
-    const validFormats = ["responsive", "display", "text", "mixed"];
+    const validFormats = ["responsive", "banner", "native"];
     if (!ad_format || !validFormats.includes(ad_format.toLowerCase())) {
       return errorResponse(
         res,
@@ -482,7 +482,7 @@ const upsertAdSettings = async (req, res) => {
     }
 
     // Validate target_pages (treat as string, no JSON parsing)
-    const validTargetPages = ["all", "posts", "homepage", "custom"];
+    const validTargetPages = ["all", "posts", "home", "custom"];
     let dbTargetPages = null;
     if (target_pages) {
       if (typeof target_pages !== "string") {
