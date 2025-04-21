@@ -2,10 +2,21 @@ const Setting = require("../models/settings.model");
 
 exports.createSetting = async (req, res) => {
   try {
-    const newSetting = await Setting.createSetting(req.body);
+    const { key, value, group } = req.body;
+
+    // Validate inputs
+    if (!key || value === undefined || value === null) {
+      return res.status(400).json({ error: "Key and value are required" });
+    }
+
+    const newSetting = await Setting.createSetting({
+      key,
+      value: String(value), // Convert to string for TEXT column
+      group: group || "general",
+    });
     res.status(201).json(newSetting);
   } catch (error) {
-    console.error("Error creating setting:", error);
+    console.error("Create Setting Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -16,7 +27,7 @@ exports.getAllSettings = async (req, res) => {
     const settings = await Setting.getAllSettings(group);
     res.json(settings);
   } catch (error) {
-    console.error("Error fetching settings:", error);
+    console.error("Get All Settings Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -32,7 +43,7 @@ exports.getSettingByKey = async (req, res) => {
 
     res.json(setting);
   } catch (error) {
-    console.error("Error fetching setting:", error);
+    console.error("Get Setting by Key Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -42,7 +53,12 @@ exports.updateSetting = async (req, res) => {
     const { key } = req.params;
     const { value } = req.body;
 
-    const updatedSetting = await Setting.updateSetting(key, value);
+    // Validate input
+    if (value === undefined || value === null) {
+      return res.status(400).json({ error: "Value is required" });
+    }
+
+    const updatedSetting = await Setting.updateSetting(key, String(value)); // Convert to string
 
     if (!updatedSetting) {
       return res.status(404).json({ error: "Setting not found" });
@@ -50,7 +66,7 @@ exports.updateSetting = async (req, res) => {
 
     res.json(updatedSetting);
   } catch (error) {
-    console.error("Error updating setting:", error);
+    console.error("Update Setting Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -67,7 +83,7 @@ exports.deleteSetting = async (req, res) => {
 
     res.json({ message: "Setting deleted successfully" });
   } catch (error) {
-    console.error("Error deleting setting:", error);
+    console.error("Delete Setting Error:", error);
     res.status(500).json({ error: "Server error" });
   }
 };

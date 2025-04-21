@@ -1,11 +1,11 @@
-const pool = require("../config/db");
+const { queryClient: pool } = require("../config/db");
 
 class Setting {
   static async createSetting({ key, value, group = "general" }) {
     const { rows } = await pool.query(
       `INSERT INTO settings (key, value, "group") 
        VALUES ($1, $2, $3) RETURNING *`,
-      [key, value, group]
+      [key, String(value), group] // Ensure value is a string
     );
     return rows[0];
   }
@@ -34,7 +34,7 @@ class Setting {
   static async updateSetting(key, value) {
     const { rows } = await pool.query(
       `UPDATE settings SET value = $1 WHERE key = $2 RETURNING *`,
-      [value, key]
+      [String(value), key] // Ensure value is a string
     );
     return rows[0];
   }

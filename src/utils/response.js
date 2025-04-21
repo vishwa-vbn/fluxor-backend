@@ -1,16 +1,24 @@
-function successResponse(res, statusCode, message, data = null) {
-    res.status(statusCode).json({
-      success: true,
-      message,
-      data,
-    });
+const errorResponse = (res, statusCode, message) => {
+  if (typeof statusCode !== 'number') {
+    console.error(`Invalid statusCode: ${statusCode}. Using 500.`);
+    statusCode = 500;
+    message = message || 'Internal server error';
   }
-  
-  function errorResponse(res, error, statusCode = 500) {
-    res.status(statusCode).json({
-      success: false,
-      message: error.message || 'An error occurred',
-    });
+  return res.status(statusCode).json({
+    status: statusCode,
+    message,
+  });
+};
+
+const successResponse = (res, statusCode, message, data = null) => {
+  const response = {
+    status: statusCode,
+    message,
+  };
+  if (data) {
+    response.data = data;
   }
-  
-  module.exports = { successResponse, errorResponse };
+  return res.status(statusCode).json(response);
+};
+
+module.exports = { successResponse, errorResponse };
