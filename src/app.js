@@ -247,6 +247,9 @@ listenClient.on('notification', (msg) => {
     if (msg.channel === "setting_changes") {
       blogNamespace.emit("setting_change", payload); // Add this block
     }
+    if (msg.channel === "ad_unit_changes") {
+      blogNamespace.emit("ad_unit_change", payload); // Add this block
+    }
   } catch (err) {
     console.error('❌ Notification parse error:', err);
   }
