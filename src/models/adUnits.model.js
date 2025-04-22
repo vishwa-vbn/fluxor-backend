@@ -345,7 +345,6 @@ class AdSettings {
   }
 
   static async upsertAdSettings({
-    id,
     publisher_id,
     ad_client,
     placements,
@@ -353,31 +352,58 @@ class AdSettings {
     ad_format,
     target_pages,
   }) {
-    const { rows } = await pool.query(
-      `INSERT INTO ad_settings (
-        id, publisher_id, ad_client, placements, ad_density, ad_format, target_pages
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7)
-      ON CONFLICT (id) DO UPDATE SET
-        publisher_id = EXCLUDED.publisher_id,
-        ad_client = EXCLUDED.ad_client,
-        placements = EXCLUDED.placements,
-        ad_density = EXCLUDED.ad_density,
-        ad_format = EXCLUDED.ad_format,
-        target_pages = EXCLUDED.target_pages,
-        updated_at = CURRENT_TIMESTAMP
-      RETURNING *`,
-      [
-        id || null, // Use null for inserts to let DB assign ID
-        publisher_id,
-        ad_client,
-        placements ? JSON.stringify(placements) : null, // Store as JSONB
-        ad_density,
-        ad_format,
-        target_pages,
-      ]
+    // Check if a record exists to determine if we should update or insert
+    const existing = await pool.query(
+      `SELECT id FROM ad_settings ORDER BY updated_at DESC LIMIT 1`
     );
-    return rows[0];
+    const existingId = existing.rows[0]?.id;
+
+    if (existingId) {
+      // Update existing record
+      const { rows } = await pool.query(
+        `UPDATE ad_settings SET
+          publisher_id = $1,
+          ad_client = $2,
+          placements = $3,
+          ad_density = $4,
+          ad_format = $5,
+          target_pages = $6,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id = $7
+        RETURNING *`,
+        [
+          publisher_id,
+          ad_client,
+          placements ? JSON.stringify(placements) : null,
+          ad_density,
+          ad_format,
+          target_pages,
+          existingId,
+        ]
+      );
+      return rows[0];
+    } else {
+      // Insert new record, letting the database generate the id
+      const { rows } = await pool.query(
+        `INSERT INTO ad_settings (
+          publisher_id, ad_client, placements, ad_density, ad_format, target_pages
+        ) VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING *`,
+        [
+          publisher_id,
+          ad_client,
+          placements ? JSON.stringify(placements) : null,
+          ad_density,
+          ad_format,
+          target_pages,
+        ]
+      );
+      return rows[0];
+    }
   }
 }
+
+
+
 
 module.exports = { AdUnit, AdSettings };
