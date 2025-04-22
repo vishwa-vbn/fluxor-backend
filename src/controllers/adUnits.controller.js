@@ -565,8 +565,6 @@
 
 
 
-
-
 const { AdUnit, AdSettings } = require("../models/adUnits.model");
 const ImageKit = require("imagekit");
 const multer = require("multer");
@@ -606,7 +604,7 @@ const createAdUnit = async (req, res) => {
         return errorResponse(res, 400, err.message);
       }
 
-      const {
+      let {
         name,
         code,
         ad_type,
@@ -620,6 +618,29 @@ const createAdUnit = async (req, res) => {
         status,
         custom_content,
       } = req.body;
+
+      // Parse data field if FormData is used
+      if (req.body.data) {
+        try {
+          const parsedData = JSON.parse(req.body.data);
+          ({
+            name,
+            code,
+            ad_type,
+            placement,
+            dimensions,
+            is_active,
+            target_pages,
+            target_audience,
+            schedule,
+            priority,
+            status,
+            custom_content,
+          } = parsedData);
+        } catch (parseError) {
+          return errorResponse(res, 400, "Invalid data field format");
+        }
+      }
 
       // Validate required fields
       if (!name || !ad_type) {
@@ -676,7 +697,7 @@ const createAdUnit = async (req, res) => {
           });
           parsedCustomContent.image_url = optimizedUrl;
         } else if (ad_type === "video") {
-          parsedCustomContent.video_url = uploadResponse.url;
+          parsedCustomContent.youtube_url = uploadResponse.url;
         }
       } else {
         // Validate URLs if provided
@@ -757,7 +778,7 @@ const updateAdUnit = async (req, res) => {
       }
 
       const { id } = req.params;
-      const {
+      let {
         name,
         code,
         ad_type,
@@ -771,6 +792,29 @@ const updateAdUnit = async (req, res) => {
         status,
         custom_content,
       } = req.body;
+
+      // Parse data field if FormData is used
+      if (req.body.data) {
+        try {
+          const parsedData = JSON.parse(req.body.data);
+          ({
+            name,
+            code,
+            ad_type,
+            placement,
+            dimensions,
+            is_active,
+            target_pages,
+            target_audience,
+            schedule,
+            priority,
+            status,
+            custom_content,
+          } = parsedData);
+        } catch (parseError) {
+          return errorResponse(res, 400, "Invalid data field format");
+        }
+      }
 
       // Validate required fields
       if (!name) {
@@ -829,7 +873,7 @@ const updateAdUnit = async (req, res) => {
           });
           parsedCustomContent.image_url = optimizedUrl;
         } else if (ad_type === "video") {
-          parsedCustomContent.video_url = uploadResponse.url;
+          parsedCustomContent.youtube_url = uploadResponse.url;
         }
       } else {
         // Validate URLs if provided
@@ -996,7 +1040,6 @@ const getAdSettings = async (req, res) => {
 const upsertAdSettings = async (req, res) => {
   try {
     const {
-      id,
       publisher_id,
       ad_client,
       placements,
@@ -1089,7 +1132,6 @@ const upsertAdSettings = async (req, res) => {
 
     // Prepare data for database
     const adSettingsData = {
-      id: id ? parseInt(id) : undefined,
       publisher_id,
       ad_client,
       placements: dbPlacements,
