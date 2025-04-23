@@ -793,6 +793,24 @@ const updateAdUnit = async (req, res) => {
         custom_content,
       } = req.body;
 
+      // Validate status
+      const validStatuses = ['active', 'paused', 'archived'];
+      if (status && !validStatuses.includes(status)) {
+        return errorResponse(
+          res,
+          400,
+          `Invalid status. Must be one of: ${validStatuses.join(", ")}`
+        );
+      }
+
+      // Ensure is_active and status are consistent (optional, based on your logic)
+      if (status === 'active' && is_active === false) {
+        return errorResponse(
+          res,
+          400,
+          "Cannot set status to 'active' when is_active is false"
+        );
+      }
       // Parse data field if FormData is used
       if (req.body.data) {
         try {
@@ -930,7 +948,7 @@ const updateAdUnit = async (req, res) => {
         target_audience: parsedTargetAudience,
         schedule: parsedSchedule,
         priority: priority ? parseInt(priority) : 0,
-        status: status || "active",
+        status: status || "paused",
       };
 
       const updatedAdUnit = await AdUnit.updateAdUnit(id, updateData);
@@ -946,6 +964,9 @@ const updateAdUnit = async (req, res) => {
       );
     });
   } catch (error) {
+    if (error.code === '23514') { // PostgreSQL check constraint violation
+      return errorResponse(res, 400, `Invalid status value: ${error.detail}`);
+    }
     return errorResponse(res, 500, error.message);
   }
 };
