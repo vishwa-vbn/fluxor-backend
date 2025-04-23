@@ -265,6 +265,8 @@ app.use('/api/post-tags', require('./routes/postTags.routes'));
 app.use('/api/comments', require('./routes/comments.routes'));
 app.use('/api/ad-units', require('./routes/adUnits.routes'));
 app.use('/api/settings', require('./routes/settings.routes'));
+app.use("/api/imagekit", require("./routes/imageKit.routes"));
+
 
 // Health-check endpoint
 app.get('/', (req, res) => {
