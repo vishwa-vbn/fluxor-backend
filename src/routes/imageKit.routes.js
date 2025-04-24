@@ -7,7 +7,7 @@ const {
   deleteFile,
   uploadFile,
   renameFile,
-} = require("../controllers/imagekit.controller");
+} = require("../controllers/imageKit.controller");
 const { isAuthenticated, isAdmin } = require("../middleware/auth");
 
 router.get("/assets", isAuthenticated, isAdmin, listAssets); // List ad_units files
