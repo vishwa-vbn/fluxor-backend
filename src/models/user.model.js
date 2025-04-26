@@ -405,7 +405,7 @@ const getPermissionsByRoleId = async (roleId) => {
 };
 
 const generateResetToken = async (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15m" });
+  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "24h" });
 };
 
 const getUserByEmail = async (email) => {
