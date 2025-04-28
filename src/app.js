@@ -102,6 +102,7 @@ app.use('/api/comments', require('./routes/comments.routes'));
 app.use('/api/ad-units', require('./routes/adUnits.routes'));
 app.use('/api/settings', require('./routes/settings.routes'));
 app.use("/api/imagekit", require("./routes/imageKit.routes"));
+app.use("/api/cloudinary",require("./routes/cloudinary.routes"))
 
 
 // Health-check endpoint
